@@ -153,7 +153,7 @@ install(EXPORT BV16Targets
 add_subdirectory(build)
 
 if(MSVC OR WIN32)
-    set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/\${CMAKE_CFG_INTDIR}")
+    set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/\$<CONFIG>")
 else()
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/Debug")

@@ -125,3 +125,37 @@ install(DIRECTORY ${GSOURCE_PATH}/include/
 	FILES_MATCHING PATTERN "*.h*"
 	PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
 )
+
+# Определение директории для копирования DLL или других артефактов в зависимости от конфигурации (Debug или Release)
+if(MSVC OR WIN32)
+    # Для мультиконфигурационных систем (таких как MSVC) используй CMAKE_CFG_INTDIR
+    set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/\$<CONFIG>")
+else()
+    # Для одноконфигурационных систем
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/debug")
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/release")
+    else()
+        set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/${CMAKE_BUILD_TYPE}")
+    endif()
+endif()
+
+# Копирование decaf.dll или других артефактов в соответствующую директорию после сборки
+if(ENABLE_SHARED)
+    add_custom_command(TARGET decaf POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:decaf>"
+        "${OUTPUT_DIRECTORY}/$<TARGET_FILE_NAME:decaf>"
+        COMMENT "Copying decaf.dll to ${OUTPUT_DIRECTORY}"
+    )
+endif()
+
+if(ENABLE_STATIC)
+    add_custom_command(TARGET decaf-static POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:decaf-static>"
+        "${OUTPUT_DIRECTORY}/$<TARGET_FILE_NAME:decaf-static>"
+        COMMENT "Copying decaf-static to ${OUTPUT_DIRECTORY}"
+    )
+endif()
