@@ -8,7 +8,6 @@ cmake/Windows/**/obj
 cmake/Windows/**/bin
 cmake/Windows/wrapper/LinphoneWrapper.cs
 **/*.temp
-build*/*
 tester/Windows/**/x64
 tester/Windows/**/obj
 tester/Windows/**/bin
@@ -19,3 +18,4 @@ CMakeUserPresets.json
 # Cache
 .cache
 .direnv
+!build*
