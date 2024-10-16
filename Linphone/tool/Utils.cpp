@@ -260,8 +260,8 @@ QString Utils::formatElapsedTime(int seconds, bool dotsSeparator) {
 
 QString Utils::formatDate(const QDateTime &date, bool includeTime) {
 	QString dateDay;
-	if (date.date() == QDate::currentDate()) dateDay = tr("Aujourd'hui");
-	else if (date.date() == QDate::currentDate().addDays(-1)) dateDay = tr("Hier");
+	if (date.date() == QDate::currentDate()) dateDay = tr("Сегодня");
+	else if (date.date() == QDate::currentDate().addDays(-1)) dateDay = tr("Вчера");
 	else {
 		QString format = date.date().year() == QDateTime::currentDateTime().date().year() ? "dd MMMM" : "dd MMMM yyyy";
 		dateDay = tr(date.date().toString(format).toLocal8Bit().data());

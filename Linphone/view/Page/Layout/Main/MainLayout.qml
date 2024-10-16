@@ -95,8 +95,8 @@ Item {
 			contentItem: Button {
 				text: currentCallNotif.currentCall 
 				? currentCallNotif.currentCall.core.conference
-					? ("Réunion en cours : ") + currentCallNotif.currentCall.core.conference.core.subject
-					: (("Appel en cours : ") + currentCallNotif.peerName) : "appel en cours"
+					? ("Идет встреча : ") + currentCallNotif.currentCall.core.conference.core.subject
+					: (("Идет звонок : ") + currentCallNotif.peerName) : "Идет звонок"
 				color: DefaultStyle.success_500main
 				onClicked: {
 					var callsWindow = UtilsCpp.getCallsWindow(currentCallNotif.currentCall)
@@ -133,38 +133,7 @@ Item {
 			anchors.fill: parent
 			spacing: 0
 			anchors.topMargin: 25 * DefaultStyle.dp
-			
-			VerticalTabBar {
-				id: tabbar
-				Layout.fillHeight: true
-				Layout.preferredWidth: 82 * DefaultStyle.dp
-				defaultAccount: accountProxy.defaultAccount
-				currentIndex: SettingsCpp.getLastActiveTabIndex()
-				Binding on currentIndex {
-					when: mainItem.contextualMenuOpenedComponent != undefined
-					value: -1
-					restoreMode: Binding.RestoreBindingOrValue
-				}
-				model: [
-					{icon: AppIcons.phone, selectedIcon: AppIcons.phoneSelected, label: qsTr("Appels")},
-					{icon: AppIcons.adressBook, selectedIcon: AppIcons.adressBookSelected, label: qsTr("Contacts")},
-					{icon: AppIcons.chatTeardropText, selectedIcon: AppIcons.chatTeardropTextSelected, label: qsTr("Conversations"), visible: !SettingsCpp.disableChatFeature},
-					{icon: AppIcons.videoconference, selectedIcon: AppIcons.videoconferenceSelected, label: qsTr("Réunions"), visible: !SettingsCpp.disableMeetingsFeature}
-				]
-				onCurrentIndexChanged: {
-					if (currentIndex == -1) return
-					SettingsCpp.setLastActiveTabIndex(currentIndex)
-                    if (currentIndex === 0 && accountProxy.defaultAccount) accountProxy.defaultAccount.core?.lResetMissedCalls()
-					if (mainItem.contextualMenuOpenedComponent) {
-						closeContextualMenuComponent()
-					}
-				}
-				Keys.onPressed: (event)=>{
-					if(event.key == Qt.Key_Right){
-						mainStackView.currentItem.forceActiveFocus()
-					}
-				}
-			}
+		
 			ColumnLayout {
 				spacing:0
 
@@ -177,7 +146,7 @@ Item {
 					SearchBar {
 						id: magicSearchBar
 						Layout.fillWidth: true
-						placeholderText: SettingsCpp.disableChatFeature ? qsTr("Rechercher un contact, appeler...") : qsTr("Rechercher un contact, appeler ou envoyer un message...")
+						placeholderText: SettingsCpp.disableChatFeature ? qsTr("Поиск контакта, звонок...") : qsTr("Поиск контакта, звонок или отправка сообщения...")
 						focusedBorderColor: DefaultStyle.main1_500_main
 						numericPadButton.visible: text.length === 0
 						numericPadButton.checkable: false
@@ -289,7 +258,7 @@ Item {
 								}
 								header: Text {
 									visible: contactList.count > 0
-									text: qsTr("Contact")
+									text: qsTr("Контакт")
 									color: DefaultStyle.main2_500main
 									font {
 										pixelSize: 13 * DefaultStyle.dp
@@ -315,7 +284,7 @@ Item {
 										
 										spacing: 10 * DefaultStyle.dp			
 										Text {
-											text: qsTr("Suggestion")
+											text: qsTr("Предложение")
 											color: DefaultStyle.main2_500main
 											font {
 												pixelSize: 13 * DefaultStyle.dp
@@ -379,6 +348,7 @@ Item {
 							}
 						}
 					}
+
 					RowLayout {
 						spacing: 10 * DefaultStyle.dp
 						PopupButton {
@@ -402,7 +372,7 @@ Item {
 									Layout.fillWidth: true
 									focus: visible
 									iconSize: 32 * DefaultStyle.dp
-									text: qsTr("Désactiver ne pas déranger")
+									text: qsTr("Отключить режим «Не беспокоить»")
 									iconSource: AppIcons.bellDnd
 									onClicked: {
 										deactivateDndButton.popup.close()
@@ -431,7 +401,7 @@ Item {
 									if (accountProxy.defaultAccount.core.mwiServerAddress.length > 0)
 										UtilsCpp.createCall(accountProxy.defaultAccount.core.mwiServerAddress)
 									else
-										UtilsCpp.showInformationPopup(qsTr("Erreur"), qsTr("L'adresse de la messagerie vocale n'est pas définie."), false)
+										UtilsCpp.showInformationPopup(qsTr("Ошибка"), qsTr("Адрес голосовой почты не задан."), false)
 								}
 							}
 						}
@@ -502,7 +472,7 @@ Item {
 										visible: !SettingsCpp.hideAccountSettings
 										focus: visible
 										iconSize: 32 * DefaultStyle.dp
-										text: qsTr("Mon compte")
+										text: qsTr("Мой аккаунт")
 										iconSource: AppIcons.manageProfile
 										onClicked: openAccountSettings(accountProxy.defaultAccount ? accountProxy.defaultAccount : accountProxy.firstAccount())
 										KeyNavigation.up: visibleChildren.length != 0 ? settingsButtons.getPreviousItem(0) : null
@@ -513,7 +483,7 @@ Item {
 										Layout.preferredHeight: 32 * DefaultStyle.dp
 										Layout.fillWidth: true
 										iconSize: 32 * DefaultStyle.dp
-										text: SettingsCpp.dnd ? qsTr("Désactiver ne pas déranger") : qsTr("Activer ne pas déranger")
+										text: SettingsCpp.dnd ? qsTr("Отключить режим «Не беспокоить»") : qsTr("Включить режим «Не беспокоить»")
 										iconSource: AppIcons.bellDnd
 										onClicked: {
 											settingsMenuButton.popup.close()
@@ -529,7 +499,7 @@ Item {
 										visible: !SettingsCpp.hideSettings
 										focus: !accountButton.visible && visible
 										iconSize: 32 * DefaultStyle.dp
-										text: qsTr("Paramètres")
+										text: qsTr("Настройки")
 										iconSource: AppIcons.settings
 										onClicked:  openContextualMenuComponent(settingsPageComponent)
 										KeyNavigation.up: visibleChildren.length != 0 ? settingsButtons.getPreviousItem(1) : null
@@ -542,7 +512,7 @@ Item {
 										visible: !SettingsCpp.disableCallRecordings
 										focus: !accountButton.visible && !settingsButton.visible && visible
 										iconSize: 32 * DefaultStyle.dp
-										text: qsTr("Enregistrements")
+										text: qsTr("Записи")
 										iconSource: AppIcons.micro
 										KeyNavigation.up: visibleChildren.length != 0 ?  settingsButtons.getPreviousItem(2) : null
 										KeyNavigation.down: visibleChildren.length != 0 ? settingsButtons.getNextItem(2) : null
@@ -553,7 +523,7 @@ Item {
 										Layout.fillWidth: true
 										iconSize: 32 * DefaultStyle.dp
 										focus: !accountButton.visible && !settingsButton.visible && !recordsButton.visible
-										text: qsTr("Aide")
+										text: qsTr("Помощь")
 										iconSource: AppIcons.question
 										onClicked: openContextualMenuComponent(helpPageComponent)
 										KeyNavigation.up: visibleChildren.length != 0 ? settingsButtons.getPreviousItem(3) : null
@@ -565,12 +535,12 @@ Item {
 										Layout.fillWidth: true
 										focus: !accountButton.visible && !settingsButton.visible && visible
 										iconSize: 32 * DefaultStyle.dp
-										text: qsTr("Quitter Linphone")
+										text: qsTr("Выйти из Linphone")
 										iconSource: AppIcons.power
 										onClicked: {
 												settingsMenuButton.popup.close()
 												UtilsCpp.getMainWindow().showConfirmationLambdaPopup(
-												qsTr("Quitter Linphone ?"),
+												qsTr("Выйти из Linphone?"),
 												"",
 												function (confirmed) {
 													if (confirmed) {
@@ -595,7 +565,7 @@ Item {
 										Layout.fillWidth: true
 										visible: SettingsCpp.maxAccount == 0 || SettingsCpp.maxAccount > accountProxy.count
 										iconSize: 32 * DefaultStyle.dp
-										text: qsTr("Ajouter un compte")
+										text: qsTr("Добавить аккаунт")
 										iconSource: AppIcons.plusCircle
 										onClicked: mainItem.addAccountRequest()
 										KeyNavigation.up: visibleChildren.length != 0 ? settingsButtons.getPreviousItem(5) : null
@@ -606,6 +576,37 @@ Item {
 						}
 					}
 				}
+
+				RowLayout {
+					TabBar {
+						Layout.fillWidth: true
+						id: tabbar
+						currentIndex: SettingsCpp.getLastActiveTabIndex()
+						Binding on currentIndex {
+							when: mainItem.contextualMenuOpenedComponent != undefined
+							value: -1
+							restoreMode: Binding.RestoreBindingOrValue
+						}
+
+						model: [qsTr("Журнал"), qsTr("Контакты")]
+
+						onCurrentIndexChanged: {
+							if (currentIndex == -1) return
+							SettingsCpp.setLastActiveTabIndex(currentIndex)
+							if (currentIndex === 0 && accountProxy.defaultAccount) accountProxy.defaultAccount.core?.lResetMissedCalls()
+							if (mainItem.contextualMenuOpenedComponent) {
+								closeContextualMenuComponent()
+							}
+						}
+						Keys.onPressed: (event)=>{
+							if(event.key == Qt.Key_Right){
+								mainStackView.currentItem.forceActiveFocus()
+							}
+						}
+
+					}
+				}
+
 				Component {
 					id: mainStackLayoutComponent
 					StackLayout {

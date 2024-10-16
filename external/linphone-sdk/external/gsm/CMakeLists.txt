@@ -89,12 +89,9 @@ install(EXPORT ${EXPORT_TARGETS_NAME}Targets
 	DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/cmake"
 )
 
-# Определение директории для копирования артефактов (например, DLL) в зависимости от конфигурации (Debug или Release)
 if(MSVC OR WIN32)
-    # Для мультиконфигурационных систем (таких как MSVC) используем CMAKE_CFG_INTDIR или $<CONFIG>
     set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/\$<CONFIG>")
 else()
-    # Для одноконфигурационных систем
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src/debug")
     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -104,7 +101,6 @@ else()
     endif()
 endif()
 
-# Копирование библиотеки после сборки
 if(BUILD_SHARED_LIBS)
     add_custom_command(TARGET gsm POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -114,7 +110,6 @@ if(BUILD_SHARED_LIBS)
     )
 endif()
 
-# Если используется статическая библиотека (например, для статической линковки), аналогичная команда
 if(NOT BUILD_SHARED_LIBS)
     add_custom_command(TARGET gsm POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

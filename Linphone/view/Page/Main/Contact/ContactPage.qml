@@ -9,8 +9,8 @@ import SettingsCpp
 
 AbstractMainPage {
 	id: mainItem
-	noItemButtonText: qsTr("Ajouter un contact")
-	emptyListText: qsTr("Aucun contact pour le moment")
+	noItemButtonText: qsTr("Добавить контакт")
+	emptyListText: qsTr("Пока нет контактов")
 	newItemIconSource: AppIcons.plusCircle
 
 	// disable left panel contact list interaction while a contact is being edited
@@ -67,94 +67,95 @@ AbstractMainPage {
 		if (!contact) return
 		var mainWin = UtilsCpp.getMainWindow()
 		mainWin.showConfirmationLambdaPopup(
-			contact.core.displayName + qsTr("sera supprimé des contacts. Voulez-vous continuer ?"),
+			contact.core.displayName + qsTr("будет удален из контактов. Вы хотите продолжить?"),
 			"",
 			function (confirmed) {
 				if (confirmed) {
 					var name = contact.core.displayName
 					contact.core.remove()
-					UtilsCpp.showInformationPopup(qsTr("Supprimé"), qsTr("%1 a été supprimé").arg(name))				}
+					UtilsCpp.showInformationPopup(qsTr("Удалено"), qsTr("%1 был удален").arg(name))
+				}
 			}
 		)
 	}
 
-	Popup {
-		id: verifyDevicePopup
-		property string deviceName
-		property string deviceAddress
-		padding: 30 * DefaultStyle.dp
-		anchors.centerIn: parent
-		closePolicy: Control.Popup.CloseOnEscape
-		modal: true
-		onAboutToHide: neverDisplayAgainCheckbox.checked = false
-		contentItem: ColumnLayout {
-			spacing: 45 * DefaultStyle.dp
-			ColumnLayout {
-				spacing: 10 * DefaultStyle.dp
-				Text {
-					text: qsTr("Augmenter la confiance")
-					font {
-						pixelSize: 22 * DefaultStyle.dp
-						weight: 800 * DefaultStyle.dp
-					}
+Popup {
+	id: verifyDevicePopup
+	property string deviceName
+	property string deviceAddress
+	padding: 30 * DefaultStyle.dp
+	anchors.centerIn: parent
+	closePolicy: Control.Popup.CloseOnEscape
+	modal: true
+	onAboutToHide: neverDisplayAgainCheckbox.checked = false
+	contentItem: ColumnLayout {
+		spacing: 45 * DefaultStyle.dp
+		ColumnLayout {
+			spacing: 10 * DefaultStyle.dp
+			Text {
+				text: qsTr("Повысить доверие")
+				font {
+					pixelSize: 22 * DefaultStyle.dp
+					weight: 800 * DefaultStyle.dp
 				}
-				ColumnLayout {
-					spacing: 24 * DefaultStyle.dp
-					Text {
-						Layout.preferredWidth: 529 * DefaultStyle.dp
-						text: qsTr("Pour augmenter le niveau de confiance vous devez appeler les différents appareils de votre contact et valider un code.")
-						font.pixelSize: 14 * DefaultStyle.dp
-					}
-					Text {
-						Layout.preferredWidth: 529 * DefaultStyle.dp
-						text: qsTr("Vous êtes sur le point d’appeler “%1” voulez vous continuer ?").arg(verifyDevicePopup.deviceName)
-						font.pixelSize: 14 * DefaultStyle.dp
+			}
+			ColumnLayout {
+				spacing: 24 * DefaultStyle.dp
+				Text {
+					Layout.preferredWidth: 529 * DefaultStyle.dp
+					text: qsTr("Чтобы повысить уровень доверия, вам нужно позвонить на устройства вашего контакта и подтвердить код.")
+					font.pixelSize: 14 * DefaultStyle.dp
+				}
+				Text {
+					Layout.preferredWidth: 529 * DefaultStyle.dp
+					text: qsTr("Вы собираетесь позвонить на устройство \"%1\", хотите продолжить?").arg(verifyDevicePopup.deviceName)
+					font.pixelSize: 14 * DefaultStyle.dp
+				}
+			}
+		}
+		RowLayout {
+			RowLayout {
+				spacing: 7 * DefaultStyle.dp
+				CheckBox {
+					id: neverDisplayAgainCheckbox
+				}
+				Text {
+					text: qsTr("Больше не показывать")
+					font.pixelSize: 14 * DefaultStyle.dp
+					MouseArea {
+						anchors.fill: parent
+						onClicked: neverDisplayAgainCheckbox.toggle()
 					}
 				}
 			}
+			Item { Layout.fillWidth: true }
 			RowLayout {
-				RowLayout {
-					spacing: 7 * DefaultStyle.dp
-					CheckBox{
-						id: neverDisplayAgainCheckbox
-					}
-					Text {
-						text: qsTr("Ne plus afficher")
-						font.pixelSize: 14 * DefaultStyle.dp
-						MouseArea {
-							anchors.fill: parent
-							onClicked: neverDisplayAgainCheckbox.toggle()
-						}
-					}
+				spacing: 15 * DefaultStyle.dp
+				Button {
+					inversedColors: true
+					text: qsTr("Отмена")
+					leftPadding: 20 * DefaultStyle.dp
+					rightPadding: 20 * DefaultStyle.dp
+					topPadding: 11 * DefaultStyle.dp
+					bottomPadding: 11 * DefaultStyle.dp
+					onClicked: verifyDevicePopup.close()
 				}
-				Item{Layout.fillWidth: true}
-				RowLayout {
-					spacing: 15 * DefaultStyle.dp
-					Button {
-						inversedColors: true
-						text: qsTr("Annuler")
-						leftPadding: 20 * DefaultStyle.dp
-						rightPadding: 20 * DefaultStyle.dp
-						topPadding: 11 * DefaultStyle.dp
-						bottomPadding: 11 * DefaultStyle.dp
+				Button {
+					text: qsTr("Позвонить")
+					leftPadding: 20 * DefaultStyle.dp
+					rightPadding: 20 * DefaultStyle.dp
+					topPadding: 11 * DefaultStyle.dp
+					bottomPadding: 11 * DefaultStyle.dp
+					onClicked: {
+						SettingsCpp.setDisplayDeviceCheckConfirmation(!neverDisplayAgainCheckbox.checked)
+						UtilsCpp.createCall(verifyDevicePopup.deviceAddress, {}, LinphoneEnums.MediaEncryption.Zrtp)
 						onClicked: verifyDevicePopup.close()
-					}
-					Button {
-						text: qsTr("Appeler")
-						leftPadding: 20 * DefaultStyle.dp
-						rightPadding: 20 * DefaultStyle.dp
-						topPadding: 11 * DefaultStyle.dp
-						bottomPadding: 11 * DefaultStyle.dp
-						onClicked: {
-							SettingsCpp.setDisplayDeviceCheckConfirmation(!neverDisplayAgainCheckbox.checked)
-							UtilsCpp.createCall(verifyDevicePopup.deviceAddress, {}, LinphoneEnums.MediaEncryption.Zrtp)
-							onClicked: verifyDevicePopup.close()
-						}
 					}
 				}
 			}
 		}
 	}
+}
 
 	leftPanelContent: FocusScope {
 		id: leftPanel
@@ -234,7 +235,7 @@ AbstractMainPage {
 							visible: contactList.count === 0 && favoriteList.count === 0
 							Layout.alignment: Qt.AlignHCenter
 							Layout.topMargin: 137 * DefaultStyle.dp
-							text: qsTr("Aucun contact")
+							text: qsTr("Нет контактов")
 							font {
 								pixelSize: 16 * DefaultStyle.dp
 								weight: 800 * DefaultStyle.dp
@@ -249,7 +250,7 @@ AbstractMainPage {
 							RowLayout {
 								spacing: 0
 								Text {
-									text: qsTr("Favoris")
+									text: qsTr("Избранное")
 									font {
 										pixelSize: 16 * DefaultStyle.dp
 										weight: 800 * DefaultStyle.dp
@@ -261,7 +262,7 @@ AbstractMainPage {
 								Button {
 									id: favoriteExpandButton
 									background: Item{}
-									icon.source: favoriteList.visible ? AppIcons.upArrow :						  AppIcons.downArrow
+									icon.source: favoriteList.visible ? AppIcons.upArrow : AppIcons.downArrow
 									Layout.preferredWidth: 24 * DefaultStyle.dp
 									Layout.preferredHeight: 24 * DefaultStyle.dp
 									icon.width: 24 * DefaultStyle.dp
@@ -271,7 +272,7 @@ AbstractMainPage {
 									KeyNavigation.down: favoriteList
 								}
 							}
-							ContactListView{
+							ContactListView {
 								id: favoriteList
 								hoverEnabled: mainItem.leftPanelEnabled
 								highlightFollowsCurrentItem: true
@@ -302,7 +303,7 @@ AbstractMainPage {
 							RowLayout {
 								spacing: 0
 								Text {
-									text: qsTr("Contacts")
+									text: qsTr("Контакты")
 									font {
 										pixelSize: 16 * DefaultStyle.dp
 										weight: 800 * DefaultStyle.dp
@@ -324,7 +325,7 @@ AbstractMainPage {
 									KeyNavigation.down: contactList
 								}
 							}
-							ContactListView{
+							ContactListView {
 								id: contactList
 								onCountChanged: {
 									if (initialFriendToDisplay.length !== 0) {
